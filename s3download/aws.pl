@@ -134,7 +134,7 @@ $cfn_version = "2010-05-15";
 	 ["GroupId i" => "GroupIdN"],
 	 ["filter F", undef, undef, \&parse_tags_describe],
      ]],
- 
+
     ["ec2", "describe-image-attribute", DescribeImageAttribute, [
 	 ["", ImageId],
 	 ["l", launchPermission],
@@ -300,6 +300,11 @@ $cfn_version = "2010-05-15";
 	 ["instance-initiated-shutdown-behavior" => InstanceInitiatedShutdownBehavior],
 	 ["placement-group" => "Placement.GroupName"],
 	 ["subnet s" => SubnetId],
+	 ["net-device-index" => "NetworkInterface.N.DeviceIndex"],
+	 ["net-security-group" => "NetworkInterface.N.SecurityGroupId.1"],
+	 ["net-subnet" => "NetworkInterface.N.SubnetId"],
+	 ["net-private-ip-address" => "NetworkInterface.N.PrivateIpAddress"],
+	 ["net-associate-public-ip-address" => "NetworkInterface.N.AssociatePublicIpAddress"],
 	 ["private-ip-address" => PrivateIpAddress],
 	 ["client-token" => ClientToken],
      ]],
@@ -361,6 +366,16 @@ $cfn_version = "2010-05-15";
      ["sourceconfiguration", SourceConfiguration],
      ["templatename", TemplateName]
     ]],
+    # http://docs.aws.amazon.com/elasticbeanstalk/latest/APIReference/API_CreateEnvironment.html
+    ["ebn", "create-environment", CreateEnvironment, [
+     ["", ApplicationName],
+     ["cnameprefix", CNAMEPrefix],
+     ["description", Description],
+     ["environmentname", EnvironmentName],
+     ["solutionstackname", SolutionStackName],
+     ["versionlabel", VersionLabel],
+     ["templatename", TemplateName]
+    ]],
     # http://docs.aws.amazon.com/elasticbeanstalk/latest/APIReference/API_CreateStorageLocation.html
     ["ebn", "create-storage-location", CreateStorageLocation, [
      ["", S3Bucket]
@@ -410,9 +425,16 @@ $cfn_version = "2010-05-15";
      ["environmentid", EnvironmentId],
      ["environmentname", EnvironmentName]
     ]],
+    # http://docs.aws.amazon.com/elasticbeanstalk/latest/APIReference/API_DescribeEnvironmentResources.html
+    ["ebn", "describe-environment-resources", DescribeEnvironmentResources, [
+     ["environmentid", EnvironmentId],
+     ["environmentname", EnvironmentName]
+    ]],
     # http://docs.aws.amazon.com/elasticbeanstalk/latest/APIReference/API_DescribeEnvironments.html
     ["ebn", "describe-environments", DescribeEnvironments, [
      ["", ApplicationName],
+     ["environmentid", EnvironmentId],
+     ["environmentname", EnvironmentName],
      ["includedeleted", IncludeDeleted],
      ["includedeletedbackto", IncludeDeletedBackTo],
      ["versionlabel", VersionLabel]
@@ -428,14 +450,22 @@ $cfn_version = "2010-05-15";
      ["environmentname", EnvironmentName]
     ]],
     # http://docs.aws.amazon.com/elasticbeanstalk/latest/APIReference/API_RequestEnvironmentInfo.html
-    ["ebn", "request-environment-info", RequestEnvironmentInfo, []],
+    ["ebn", "request-environment-info", RequestEnvironmentInfo, [
+     ["environmentid", EnvironmentId],
+     ["environmentname", EnvironmentName],
+     ["infotype", InfoType]
+    ]],
     # http://docs.aws.amazon.com/elasticbeanstalk/latest/APIReference/API_RestartAppServer.html
     ["ebn", "restart-app-server", RestartAppServer, [
      ["environmentid", EnvironmentId],
      ["environmentname", EnvironmentName]
     ]],
     # http://docs.aws.amazon.com/elasticbeanstalk/latest/APIReference/API_RetrieveEnvironmentInfo.html
-    ["ebn", "retrieve-environment-info", RetrieveEnvironmentInfo, []],
+    ["ebn", "retrieve-environment-info", RetrieveEnvironmentInfo, [
+     ["environmentid", EnvironmentId],
+     ["environmentname", EnvironmentName],
+     ["infotype", InfoType],
+    ]],
     # http://docs.aws.amazon.com/elasticbeanstalk/latest/APIReference/API_SwapEnvironmentCNAMEs.html
     ["ebn", "swap-environment-cnames", SwapEnvironmentCNAMEs, [
      ["destinationenvironmentid", DestinationEnvironmentId],
@@ -473,7 +503,7 @@ $cfn_version = "2010-05-15";
     ###
     ### NOT Implemented: http://docs.aws.amazon.com/elasticbeanstalk/latest/APIReference/API_ValidateConfigurationSettings.html
     ###
-    
+
     #############
     ###  ELB  ###
     #############
@@ -888,7 +918,7 @@ $cfn_version = "2010-05-15";
 	 [maxitems => maxitems],
      ]],
     ["r53", "get-change gch", 'GET|', [
-	 ['' => change_id], 
+	 ['' => change_id],
      ]],
     ["r53", "get-hosted-zone ghz", 'GET|', [
      	 ['', zone_id],
@@ -900,10 +930,6 @@ $cfn_version = "2010-05-15";
      ]],
     ["r53", "delete-hosted-zone dhz", 'DELETE|', [
 	 ['' => zone_id],
-     ]],
-    ["r53", "list-resource-record-sets lrrs", 'GET|rrset', [
-	 ['' => zone_id],
-     	 [maxitems => maxitems],
      ]],
     ["r53", "change-resource-record-set crrs", 'POST|rrset', [
 	 ['' => zone_id],
@@ -1080,7 +1106,18 @@ $scheme = $http? "http": "https";
 $silent ||= !-t;
 $retry = 3 unless length($retry);
 
-$secrets_file = $ENV{AWS_SECRETS_LOCATION};
+
+$secrets_file ||= "$home/.awssecret" if -e "$home/.awssecret";
+$secrets_file ||= "$home/.s3cfg" if -e "$home/.s3cfg";
+$secrets_file ||= "$home/.passwd-s3fs" if -e "$home/.passwd-s3fs";
+
+foreach (qw/authinfo netrc/)
+{
+    $secrets_file ||= "$home/.$_" if -e "$home/.$_";
+    $secrets_file ||= "$home/.$_.gpg" if -e "$home/.$_.gpg";
+}
+
+$secrets_file ||= "$home/.awssecret";
 
 # by default look for "machine AWS" in netrc files
 $netrc_machine ||= 'AWS';
@@ -1167,7 +1204,7 @@ unless ($awskey && $secret)
 
            # handle authinfo/netrc format
            if ($secret_data =~ /^\s*
-	       machine\s+AWS\s+.*?
+	       machine\s+(\S+)\s+.*?
 	       login\s+(\S+)\s+.*?
 	       password\s+(\S+)\s+.*?
 	       (\s+session\s+(\S+?))?/xm)
@@ -1247,7 +1284,7 @@ if ($assume)
     $data{SecurityToken} = $session if $session;
 
     my($url);
-    
+
     for (sort keys %data)
     {
 	$url .= "&" if $url;
@@ -1541,7 +1578,7 @@ if (!$cmd_data)
 
     if ($service eq "aws")
     {
-       if ($action eq "XMLVERSION") 
+       if ($action eq "XMLVERSION")
        {
           my $versions = { "ec2" => $ec2_version, "sqs" => $sqs_version, "elb" => $elb_version, "sdb" => $sdb_version, "iam" => $iam_version, "ebn" => $ebn_version, "cfn" => $cfn_version };
           if ($#ARGV > 0)
@@ -1799,12 +1836,12 @@ if (!$cmd_data)
 	my ($pname, $aname) = @{ $param->[0] };
 	shift @$param unless $pname;
 	my $r53_endpoint = 'route53.amazonaws.com';
-	my $url="https://$r53_endpoint/$r53_version/"; 
+	my $url="https://$r53_endpoint/$r53_version/";
 	my ($method,$reqaction) = split(/\|/, $action);
 	die "No method (action = '$action') for $cmd." unless $method;
 	my (%prefix) = (zone_id => 'hostedzone',
 			change_id => 'change');
-	$url .= "$prefix{$aname}/$id" if $prefix{$aname};  # /hostedzone/xxx or /change/xxx 
+	$url .= "$prefix{$aname}/$id" if $prefix{$aname};  # /hostedzone/xxx or /change/xxx
 	$url .= "/$reqaction" if $reqaction;
 	$url .= "?" if $method eq 'GET';
 	my %args;
@@ -1834,7 +1871,7 @@ if (!$cmd_data)
 	my @curl = ('-H' => "'X-Amzn-Authorization: $auth'",
 		    '-H' => "'x-amz-date: $zulu'" );
 	push (@curl, '-H' => "x-amz-security-token:$session") if $session;
-	
+
 	my $cmd;
 	if ($method eq 'GET')
 	{
@@ -1850,7 +1887,7 @@ if (!$cmd_data)
 	    # nothing special to do in this case.  URL is set up.
 	    push (@curl, '-X' => $method); # must make it use this method.
 	}
-	else  # method must be POST 
+	else  # method must be POST
 	{
 	    my $hdr = R53_xml_data() -> {'header'};
 	    my $xmlsrc = R53_xml_data() -> {$action};
@@ -2069,7 +2106,78 @@ if (!$cmd_data)
 
 	    for (my $i = 0; $i < @instanceId; $i++)
 	    {
-		$pending += $instanceState[$i] eq "pending";
+		$pending += $instanceState[$i] eq "pending" || $instanceState[$i] eq "stopping";
+		print "$instanceId[$i]\t$instanceState[$i]\t$dnsName[$i]\t$groupId[$i]\n";
+	    }
+
+	    last unless $wait && $pending;
+
+	    sleep $wait;
+	    $result = qx[$0 --cmd0 --xml --region=$region describe-instances @instanceId];
+	}
+    }
+    elsif ($result =~ /<StartInstancesResponse|<StopInstancesResponse/ && ($simple || $wait))
+    {
+	my(@instanceId, @instanceState, @dnsName, @groupId);
+	my($groupId) = $result =~ /<groupId>(.*?)<\/groupId>/;
+
+	# First result is from start/stop so different location for instanceState => currentState
+	while ($result =~ /(<instancesSet.*?<\/instancesSet>)/sg)
+	{
+	    my($result) = ($1);
+	    while ($result =~ /(<item(?:<item.*?<\/item>|.)*?<\/item>)/sg)
+	    {
+		my($result) = ($1);
+		my($instanceId) = $result =~ /<instanceId>(.*?)<\/instanceId>/s;
+		my($instanceState) = map {/<name>(.*?)<\/name>/s} $result =~ /<currentState>(.*?)<\/currentState>/s;
+		my($dnsName) = $result =~ /<dnsName>(.*?)<\/dnsName>/s;
+		push @instanceId, $instanceId;
+		push @instanceState, $instanceState;
+		push @dnsName, $dnsName;
+		push @groupId, $groupId;
+	    }
+	}
+
+	my($pending);
+
+	for (my $i = 0; $i < @instanceId; $i++)
+	{
+	    $pending += $instanceState[$i] eq "pending" || $instanceState[$i] eq "stopping";
+	    print "$instanceId[$i]\t$instanceState[$i]\t$dnsName[$i]\t$groupId[$i]\n";
+	}
+
+	last unless $wait && $pending;
+
+	sleep $wait;
+	$result = qx[$0 --cmd0 --xml --region=$region describe-instances @instanceId];
+
+	# Now the result needs to be handled for describe-instances. instanceState => instanceState
+	for (;;)
+	{
+	    my(@instanceId, @instanceState, @dnsName, @groupId);
+	    my($groupId) = $result =~ /<groupId>(.*?)<\/groupId>/;
+
+	    while ($result =~ /(<instancesSet.*?<\/instancesSet>)/sg)
+	    {
+		my($result) = ($1);
+		while ($result =~ /(<item(?:<item.*?<\/item>|.)*?<\/item>)/sg)
+		{
+		    my($result) = ($1);
+		    my($instanceId) = $result =~ /<instanceId>(.*?)<\/instanceId>/s;
+		    my($instanceState) = map {/<name>(.*?)<\/name>/s} $result =~ /<instanceState>(.*?)<\/instanceState>/s;
+		    my($dnsName) = $result =~ /<dnsName>(.*?)<\/dnsName>/s;
+		    push @instanceId, $instanceId;
+		    push @instanceState, $instanceState;
+		    push @dnsName, $dnsName;
+		    push @groupId, $groupId;
+		}
+	    }
+
+	    my($pending);
+
+	    for (my $i = 0; $i < @instanceId; $i++)
+	    {
+		$pending += $instanceState[$i] eq "pending" || $instanceState[$i] eq "stopping";
 		print "$instanceId[$i]\t$instanceState[$i]\t$dnsName[$i]\t$groupId[$i]\n";
 	    }
 
@@ -2571,7 +2679,8 @@ sub xml2yaml {
 	$result =~ s#<([a-z0-9:]*).*>#$rubySymbol\1: #gi; # opening tags -> symbols
 	$result =~ s#($rubySymbol[^:]+): (.+)#\1: "\2"#g; # opening tags -> symbols
 	$result =~ s#:?(.*)/:#\1:#g;                      # empty values
-	$result =~ s#:?(item|bucket|member): #- #gi;      # array items
+	$result =~ s#:?(item|bucket|member|ResourceRecordSet|HostedZone|ResourceRecord): #- #gi;
+	                                                  # array items
 	$result =~ s#\t#  #g;                             # tabs -> spaces
 	$result =~ s#^[ :]*\n##mg;                        # remove all empty lines
 	$result =~ s#[ ]+$##gm;                           # remove all trailing spaces
@@ -2828,7 +2937,7 @@ sub s3
     my($vhost, $vname) = ($s3host, $uname);
     if (!$no_vhost)
     {
-	($vhost, $vname) = ($dns_alias? $1: "$1.$vhost", $2) if $uname =~ /^([0-9a-z][\.\-0-9a-z]{1,61}[0-9a-z])(?:\/(.*))?$/;
+	($vhost, $vname) = ($dns_alias? $1: "$1.$vhost", $2) if $uname =~ /^([0-9a-z][\-0-9a-z]{1,61}[0-9a-z])(?:\/(.*))?$/;
     }
     print STDERR "vhost=$vhost  vname=$vname\n" if $v;
 
@@ -3012,7 +3121,7 @@ sub pa
     my $endpoint = "webservices.amazon.com";
     my $uri = "/onca/xml";
     my %data = (Service => AWSECommerceService, AWSAccessKeyId => $awskey, SignatureMethod => ($sha1? HmacSHA1: HmacSHA256), SignatureVersion => 2, Version => $version, Timestamp => $zulu, @p);
-    
+
     for (sort keys %data)
     {
 	if ($service eq "sqs" && $_ eq "QueueUri")
@@ -3106,7 +3215,7 @@ sub ec2
     $queue ||= "/";
 
     my($url);
-    
+
     for (sort keys %data)
     {
 	if ($service eq "sqs" && $_ eq "QueueUri")
@@ -3220,9 +3329,8 @@ sub guess_is_unix
 
 sub get_home_directory
 {
-	return "/mnt/disk1/tmp/$ENV{USEREMAILHASH}";
-    #return $ENV{HOME} || "$ENV{HOMEDRIVE}$ENV{HOMEPATH}" || "C:" if !$isUnix;
-    #return (getpwuid($<))[7];
+    return $ENV{HOME} || "$ENV{HOMEDRIVE}$ENV{HOMEPATH}" || "C:" if !$isUnix;
+    return (getpwuid($<))[7];
 }
 
 
@@ -3235,7 +3343,7 @@ sub sign
 	(my $pretty = $data) =~ s/\n/\\n/sg;
 	print STDERR "data = [$pretty]\n";
     }
-    
+
     encode_base64(hmac($data, $secret, $shaX eq HmacSHA256? \&sha256_sha256: \&sha1_sha1), "");
 }
 
@@ -3635,7 +3743,7 @@ sub R53_xml_data {
 }
 
 
-# 
+#
 # sha256 interface
 #
 
@@ -3721,7 +3829,7 @@ sub _sha256_transform
 
     my($T1, $T2);
     my($a, $b, $c, $d, $e, $f, $g, $h) = @{$self->{_state}};
-    
+
     for (my $t = 0; $t < 64; $t++)
     {
 	if ($t >= 16)
@@ -3806,16 +3914,16 @@ sub calc_hash
 
 	$self->_sha256_transform(unpack("N*", pack("C*", @{$self->{_buffer}})));
     }
-    
+
     $self;
 }
 
 sub get_hash_hex
 {
     my $self = shift;
-    
+
     return unless defined $self->{_state};
-    
+
     my $hex = "";
     $hex .= sprintf("%08x", $_) for @{$self->{_state}};
 

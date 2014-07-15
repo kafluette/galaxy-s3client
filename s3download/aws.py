@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 import sys
-import hashlib
 import os
-import shutil
 from subprocess import Popen, PIPE
 
 print os.environ
 
-TMP_DIR = '/mnt/disk1/tmp'
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 
 # get command line args
@@ -17,20 +14,9 @@ bucket = sys.argv[3]
 remotefile = sys.argv[4]
 localfile = sys.argv[5]
 ud = sys.argv[6]
-useremail = sys.argv[7]
 
-# create the temporary folder
-useremailhash = hashlib.md5(useremail).hexdigest()
-os.environ['USEREMAILHASH'] = useremailhash
-working_dir = os.path.join(TMP_DIR,useremailhash)
-if not os.path.exists(working_dir):
-	os.mkdir(working_dir)
-
-# put the aws access key and secret in a temp file
-aws_secrets_file = os.path.join(working_dir,'aws-secrets')
-with open(aws_secrets_file,'wb') as handle:
-	handle.write("{}\n{}".format(accesskey,secretkey))
-os.environ['AWS_SECRETS_LOCATION'] = aws_secrets_file
+os.environ['AWS_ACCESS_KEY_ID'] = accesskey
+os.environ['AWS_SECRET_KEY'] = secretkey
 
 if localfile == '-':
 	localfile = 's3client_download'
@@ -58,6 +44,3 @@ else:
 	# we had an error
 	sys.stdout.write(output)
 	sys.stderr.write(error)
-
-# cleanup the temporary folder
-shutil.rmtree(working_dir)
