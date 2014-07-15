@@ -16,9 +16,6 @@ ud = sys.argv[6]
 os.environ['AWS_ACCESS_KEY_ID'] = accesskey
 os.environ['AWS_SECRET_KEY'] = secretkey
 
-if localfile == '-':
-	localfile = 's3client_download'
-
 # build up the arguments
 args = ['{}/aws.pl'.format(CUR_DIR),'--insecure-aws']
 if ud == 'u':
@@ -32,11 +29,5 @@ print args
 awspl = Popen(args,stdout=PIPE,stderr=PIPE)
 stdout,stderr = awspl.communicate()
 
-# redirect perl script's output
-if len(stdout.strip()) == 0:
-	# assume success
-	pass
-else:
-	# we had an error
-	sys.stdout.write(stdout)
-	sys.stderr.write(stderr)
+sys.stdout.write(stdout)
+sys.stderr.write(stderr)
