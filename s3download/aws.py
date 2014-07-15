@@ -31,8 +31,6 @@ args += ['{}/{}'.format(bucket,remotefile),localfile]
 print args
 awspl = Popen(args,stdout=PIPE,stderr=PIPE)
 stdout,stderr = awspl.communicate()
-output = stdout.read()
-error = stderr.read()
 
 # redirect perl script's output
 if len(output.strip()) == 0:
@@ -40,5 +38,5 @@ if len(output.strip()) == 0:
 	pass
 else:
 	# we had an error
-	sys.stdout.write(output)
-	sys.stderr.write(error)
+	sys.stdout.write(stdout)
+	sys.stderr.write(stderr)
