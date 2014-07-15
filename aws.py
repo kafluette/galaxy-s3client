@@ -40,7 +40,7 @@ args += ['{}/{}'.format(bucket,remotefile),localfile]
 
 # execute the perl script
 print args
-awspl = Popen(args,stdout=PIPE,stderr=PIPE,shell=True)
+awspl = Popen(args,stdout=PIPE,stderr=PIPE)
 stdout,stderr = awspl.communicate()
 output = stdout.read()
 error = stderr.read()
