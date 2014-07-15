@@ -3,8 +3,6 @@ import sys
 import os
 from subprocess import Popen, PIPE
 
-print os.environ
-
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 
 # get command line args
