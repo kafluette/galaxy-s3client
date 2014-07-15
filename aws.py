@@ -13,8 +13,10 @@ remotefile = sys.argv[4]
 localfile = sys.argv[5]
 ud = sys.argv[6]
 
-os.environ['AWS_ACCESS_KEY_ID'] = accesskey
-os.environ['AWS_SECRET_KEY'] = secretkey
+#os.environ['AWS_ACCESS_KEY_ID'] = accesskey
+#os.environ['AWS_SECRET_KEY'] = secretkey
+os.environ['EC2_ACCESS_KEY'] = accesskey
+os.environ['EC2_SECRET_KEY'] = secretkey
 
 # build up the arguments
 args = ['{}/aws.pl'.format(CUR_DIR),'--insecure-aws']

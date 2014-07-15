@@ -17,7 +17,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-
 $ec2_version = "2013-10-15";
 $sqs_version = "2009-02-01";
 $elb_version = "2010-07-01";
