@@ -1,8 +1,8 @@
 <tool id="S3client" name="S3Client" version="1.0.0" hidden="false" tool_type="data_source" URL_method="post">
 	<description>Download/upload files from/to Amazon S3</description>
-		<command interpreter="python">aws.py $accesskey $secretkey $bucket $remotefile $localfile $u_or_d $userEmail</command>
+		<command interpreter="python">aws.py $accesskey $secretkey $bucket $remotefile $localfile $u_or_d $__user_email__</command>
 		<inputs>
-       		<param name="accesskey" type="text" label="Amazon AWS Access Key"/>
+       			<param name="accesskey" type="text" label="Amazon AWS Access Key"/>
 			<param name="secretkey" type="text" label="Amazon AWS Secret Access Key"/>
 			<param name="bucket" type="text" label="Bucket to be worked with"/>
 			<param name="remotefile" type="text" label="File name on S3"/>
@@ -13,7 +13,7 @@
 			</param>
 		</inputs>
    		<outputs>
-       		<data format="text" name="output" /><!--Whether or not upload was successful-->
+			<data format="text" name="output" /><!--Whether or not upload was successful-->
 		</outputs>
 		
 		<help>
