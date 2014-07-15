@@ -1,0 +1,23 @@
+<tool id="S3client" name="S3Client" version="1.0.0" hidden="false" tool_type="data_source" URL_method="post">
+	<description>Download/upload files from/to Amazon S3</description>
+		<command interpreter="python">aws.py $accesskey $secretkey $bucket $remotefile $localfile $u_or_d $userEmail</command>
+		<inputs>
+       		<param name="accesskey" type="text" label="Amazon AWS Access Key"/>
+			<param name="secretkey" type="text" label="Amazon AWS Secret Access Key"/>
+			<param name="bucket" type="text" label="Bucket to be worked with"/>
+			<param name="remotefile" type="text" label="File name on S3"/>
+			<param name="localfile" type="text" label="File name on Galaxy"/>
+			<param name="u_or_d" type="select" label="Upload or Download">
+				<option value="u">Upload</option>
+				<option value="d">Download</option>
+			</param>
+		</inputs>
+   		<outputs>
+       		<data format="text" name="output" /><!--Whether or not upload was successful-->
+		</outputs>
+		
+		<help>
+			This tool uploads files to Amazon S3 and downloads files from Amazon S3.
+		</help>
+ </tool>
+ 
