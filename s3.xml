@@ -2,8 +2,8 @@
 	<description>Download/upload files from/to Amazon S3</description>
 	<command interpreter="python">aws.py $accesskey $secretkey $bucket $remotefile $localfile $u_or_d $__user_email__</command>
 	<inputs>
-		<param name="accesskey" type="text" label="Amazon AWS Access Key"/>
-		<param name="secretkey" type="text" label="Amazon AWS Secret Access Key"/>
+		<param name="accesskey" type="text" size="20" label="Amazon AWS Access Key"/>
+		<param name="secretkey" type="text" size="40" label="Amazon AWS Secret Access Key"/>
 		<param name="bucket" type="text" label="Bucket to be worked with"/>
 		<param name="remotefile" type="text" label="File name on S3"/>
 		<param name="localfile" type="text" label="File name on Galaxy"/>
