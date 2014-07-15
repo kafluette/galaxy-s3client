@@ -31,4 +31,7 @@ awspl = Popen(args,stdout=PIPE,stderr=PIPE)
 stdout,stderr = awspl.communicate()
 
 sys.stdout.write(stdout)
+#sys.stdout.write(stderr)
 sys.stderr.write(stderr)
+
+os.exit(len(stderr.strip()))
