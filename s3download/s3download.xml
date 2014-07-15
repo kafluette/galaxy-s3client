@@ -9,7 +9,7 @@
 	</inputs>
 	<outputs>
 		<data format="input" name="s3client_output" />
-		<data format="" name="s3client_download" />
+		<data format="file" name="s3client_download" />
 	</outputs>
 	
 	<help>

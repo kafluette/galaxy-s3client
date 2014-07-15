@@ -3,7 +3,6 @@ import sys
 import hashlib
 import os
 import shutil
-import uuid
 from subprocess import Popen, PIPE
 
 TMP_DIR = '/mnt/disk1/tmp'
@@ -32,7 +31,7 @@ with open(aws_secrets_file,'wb') as handle:
 os.environ['AWS_SECRETS_LOCATION'] = aws_secrets_file
 
 if localfile == '-':
-	localfile = os.path.join(working_dir,str(uuid.uuid4()))
+	localfile = 's3client_download'
 
 # build up the arguments
 args = ['{}/aws.pl'.format(CUR_DIR),'--insecure-aws']
