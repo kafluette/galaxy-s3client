@@ -9,7 +9,7 @@
 		<param name="localfile" type="text" label="File name on Galaxy"/>
 	</inputs>
 	<outputs>
-		<data format="file" name="s3client_status" label="Upload Status" />
+		<data format="file" name="s3client_status" label="Amazon S3 Upload" />
 	</outputs>
 	<help>
 		This tool uploads files to Amazon S3 from Galaxy.

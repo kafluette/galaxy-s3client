@@ -31,4 +31,4 @@ stdout,stderr = awspl.communicate()
 output_handle.write(stdout)
 output_handle.write(stderr)
 
-os.exit(len(stderr.strip()))
+sys.exit(len(stderr.strip()))

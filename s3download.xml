@@ -8,8 +8,8 @@
 		<param name="remotefile" type="text" label="File name on S3"/>
 	</inputs>
 	<outputs>
-		<data format="file" name="s3client_download" label="Download Location" />
-		<data format="file" name="s3client_status" label="Download Status" />
+		<data format="file" name="s3client_download" />
+		<data format="file" name="s3client_status" label="Amazon S3 Download" />
 	</outputs>
 	
 	<help>
