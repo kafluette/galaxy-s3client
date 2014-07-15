@@ -20,7 +20,8 @@ useremail = sys.argv[7]
 useremailhash = hashlib.md5(useremail).hexdigest()
 os.environ['USEREMAILHASH'] = useremailhash
 working_dir = os.path.join(TMP_DIR,useremailhash)
-os.mkdir(working_dir)
+if not os.path.exists(working_dir):
+	os.mkdir(working_dir)
 
 # put the aws access key and secret in a temp file
 aws_secrets_file = os.path.join(working_dir,'aws-secrets')
