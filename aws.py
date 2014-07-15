@@ -17,7 +17,7 @@ ud = sys.argv[6]
 useremail = sys.argv[7]
 
 # create the temporary folder
-useremailhash = hashlib.md5(useremail)
+useremailhash = hashlib.md5(useremail).hexdigest()
 os.environ['USEREMAILHASH'] = useremailhash
 working_dir = os.path.join(TMP_DIR,useremailhash)
 os.mkdir(working_dir)
