@@ -6,6 +6,7 @@ import shutil
 from subprocess import Popen, PIPE
 
 TMP_DIR = '/mnt/disk1/tmp'
+CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 
 # get command line args
 accesskey = sys.argv[1]
@@ -30,7 +31,7 @@ with open(aws_secrets_file,'wb') as handle:
 os.environ['AWS_SECRETS_LOCATION'] = aws_secrets_file
 
 # build up the arguments
-args = ['aws.pl','--insecure-aws',accesskey,secretkey]
+args = ['{}/aws.pl'.format(CUR_DIR),'--insecure-aws',accesskey,secretkey]
 if ud == 'u':
 	args.append('put')
 else:
