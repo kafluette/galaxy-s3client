@@ -31,7 +31,7 @@ with open(aws_secrets_file,'wb') as handle:
 os.environ['AWS_SECRETS_LOCATION'] = aws_secrets_file
 
 # build up the arguments
-args = ['{}/aws.pl'.format(CUR_DIR),'--insecure-aws',accesskey,secretkey]
+args = ['{}/aws.pl'.format(CUR_DIR),'--insecure-aws']
 if ud == 'u':
 	args.append('put')
 else:
