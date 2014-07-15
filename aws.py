@@ -27,8 +27,6 @@ else:
 args += ['{}/{}'.format(bucket,remotefile),localfile]
 
 # execute the perl script
-print args
-print os.environ
 awspl = Popen(args,stdout=PIPE,stderr=PIPE)
 stdout,stderr = awspl.communicate()
 
