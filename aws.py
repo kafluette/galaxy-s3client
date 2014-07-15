@@ -11,7 +11,7 @@ bucket = sys.argv[3]
 remotefile = sys.argv[4]
 localfile = sys.argv[5]
 ud = sys.argv[6]
-redirect_file = sys.argv[7]
+redirect_file = None if len(sys.argv) != 8 else redirect_file = sys.argv[7]
 
 os.environ['EC2_ACCESS_KEY'] = accesskey
 os.environ['EC2_SECRET_KEY'] = secretkey
@@ -23,7 +23,7 @@ else:
 	args.append('get')
 args += ['{}/{}'.format(bucket,remotefile),localfile]
 
-output_handle = open(redirect_file,'wb')
+output_handle = open(redirect_file,'wb') if redirect_file is not None else sys.stdout
 
 awspl = Popen(args,stdout=PIPE,stderr=PIPE)
 stdout,stderr = awspl.communicate()
