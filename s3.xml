@@ -1,4 +1,4 @@
-<tool id="S3client" name="Amazon S3" version="1.0.0" hidden="false" tool_type="data_source" URL_method="post">
+<tool id="S3client" name="Amazon S3">
 	<description>Download/upload files from/to Amazon S3</description>
 	<command interpreter="python">aws.py $accesskey $secretkey $bucket $remotefile $localfile $u_or_d $__user_email__</command>
 	<inputs>
