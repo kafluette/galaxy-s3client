@@ -5,6 +5,8 @@ import os
 import shutil
 from subprocess import Popen, PIPE
 
+print os.environ
+
 TMP_DIR = '/mnt/disk1/tmp'
 CUR_DIR = os.path.dirname(os.path.realpath(__file__))
 
