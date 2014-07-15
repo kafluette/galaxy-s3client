@@ -33,7 +33,7 @@ awspl = Popen(args,stdout=PIPE,stderr=PIPE)
 stdout,stderr = awspl.communicate()
 
 # redirect perl script's output
-if len(output.strip()) == 0:
+if len(stdout.strip()) == 0:
 	# assume success
 	pass
 else:
