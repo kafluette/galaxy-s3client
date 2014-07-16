@@ -1,6 +1,6 @@
 <tool id="S3DownloadClient" name="Amazon S3 Download">
 	<description>Download files from Amazon S3 to Galaxy</description>
-	<command interpreter="python">aws.py "$accesskey" "$secretkey" "$bucket" "$remotefile" "$s3client_download"  d "$s3client_status"</command>
+	<command interpreter="python">aws.py "$accesskey" "$secretkey" "$bucket" "$remotefile" "$s3client_download"  d</command>
 	<inputs>
 		<param name="accesskey" type="text" size="20" label="Amazon AWS Access Key"/>
 		<param name="secretkey" type="text" size="40" label="Amazon AWS Secret Access Key"/>
@@ -9,7 +9,7 @@
 	</inputs>
 	<outputs>
 		<data format="file" name="s3client_download" />
-		<data format="file" name="s3client_status" label="Amazon S3 Download" />
+		<data format="text" name="s3client_status" label="Amazon S3 Download" />
 	</outputs>
 	
 	<help>
