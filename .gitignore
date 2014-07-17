@@ -1,0 +1,5 @@
+.DS_Store
+*~
+*.class
+out/
+src/META-INF/
