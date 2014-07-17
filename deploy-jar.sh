@@ -47,7 +47,7 @@ echo "Changes to the JAR (or bash script) do not require a restart."
 
 if [[ "$(hostname)" -eq "freyja" ]]; then
     echo -n "This script is running on freyja. Do you want to copy over the jar? (y/n)  "
-    read -n should_copy
+    read should_copy
     if [[ "$should_copy" -eq "y" ]]; then
         echo -n "Copying JAR and fixing permissions ... "
         sudo cp out/artifacts/galaxy_s3client_jar/galaxy-s3client.jar /shared/c2g2/galaxy-dist/tools/s3client/
@@ -59,7 +59,7 @@ if [[ "$(hostname)" -eq "freyja" ]]; then
     fi
 else
     echo -n "This script is not running on freyja. Attempt to deploy the JAR? "
-    read -n should_deploy
+    read should_deploy
     if [[ "$should_deploy" -eq "y" ]]; then
         echo "Attempting naive remote deployment ... "
         scp out/artifacts/galaxy_s3client_jar/galaxy-s3client.jar freyja:
