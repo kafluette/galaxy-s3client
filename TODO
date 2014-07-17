@@ -1,3 +1,0 @@
-* make s3download only produce one output
-* stop using aws.pl, utilize the java library which supports multithreaded up/download
-

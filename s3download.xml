@@ -1,19 +1,18 @@
 <tool id="S3DownloadClient" name="Amazon S3 Download">
 	<description>Download files from Amazon S3 to Galaxy</description>
-	<command interpreter="python">aws.py "$accesskey" "$secretkey" "$bucket" "$remotefile" "$s3client_download"  d</command>
+        <command interpreter="bash">/usr/local/bin/java -jar galaxy-s3client.jar d "$bucket" "$remotefile" "$s3client_download" "$accesskey" "$secretkey"</command>
 	<inputs>
-		<param name="accesskey" type="text" size="20" label="Amazon AWS Access Key"/>
-		<param name="secretkey" type="text" size="40" label="Amazon AWS Secret Access Key"/>
-		<param name="bucket" type="text" label="Bucket to be worked with"/>
-		<param name="remotefile" type="text" label="File name on S3"/>
+		<param name="accesskey" type="text" size="30" label="Amazon AWS Access Key"/>
+		<param name="secretkey" type="text" size="50" label="Amazon AWS Secret Access Key"/>
+		<param name="bucket" type="text" size="30" label="Bucket to be worked with"/>
+		<param name="remotefile" type="text" size="50" label="File name on S3"/>
 	</inputs>
 	<outputs>
-		<data format="file" name="s3client_download" />
-		<data format="text" name="s3client_status" label="Amazon S3 Download" />
+            <data format="file" name="s3client_download" label="Amazon S3 Download" />
 	</outputs>
-	
+
 	<help>
 		This tool downloads files from Amazon S3 to Galaxy.
 	</help>
  </tool>
- 
+
