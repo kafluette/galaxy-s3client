@@ -38,7 +38,11 @@ fi
 popd >/dev/null 2>&1
 
 echo "Building JAR ..."
-ant || (echo "Build failed." ; exit 3)
+ant
+if [[ $? -ne 0 ]]; then
+  echo "Build failed."
+  exit 11
+fi
 
 echo "Copying over required files ..."
 cp s3upload.xml s3download.xml out/deploy
