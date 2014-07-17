@@ -45,7 +45,7 @@ fi
 echo "If a change was made to the XML files, you must restart Galaxy."
 echo "Changes to the JAR (or bash script) do not require a restart."
 
-if [[ "$(hostname)" -eq "freyja" ]]; then
+if [[ $(hostname)  == freyja ]]; then
     echo -n "This script is running on freyja. Do you want to copy over the jar? (y/n)  "
     read should_copy
     if [[ "$should_copy" -eq "y" ]]; then
