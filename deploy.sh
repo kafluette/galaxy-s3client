@@ -1,14 +1,16 @@
 #!/bin/bash
+
+echo "Checking for JDK ..."
+if [ -z "$(which javac)" ]; then
+  echo "No JDK found in your PATH."
+  exit 9
+else
+  echo "Found JDK with javac at $(which javac)"
+fi
+
 echo "Cleaning up from previous deploy ..."
 rm -rf out/deploy >/dev/null 2>&1
 mkdir -p out/deploy
-
-echo "Setting java home ..."
-if [[ "$(hostname)" -eq "freyja" ]]; then
-  echo "jdk.home.1.7=/usr/lib/jvm/java-7-oracle" > build.properties
-else
-  echo "jdk.home.1.7=/usr/lib/jvm/java-7-openjdk-amd64" > build.properties
-fi
 
 echo "Assuring libraries are present ..."
 
@@ -42,8 +44,37 @@ echo "Copying over required files ..."
 cp s3upload.xml s3download.xml out/deploy
 cp out/artifacts/galaxy_s3client_jar/galaxy-s3client.jar out/deploy
 
-echo "Cleaning up"
-rm build.properties
+if [[ "$(hostname)" -eq "freyja" ]]; then
+  echo "This script is running on freyja, attempting deploy ..."
+  sudo cp out/deploy/* /shared/c2g2/galaxy-dist/tools/s3client/
+  sudo chown -R galaxy:galaxy /shared/c2g2/galaxy-dist/tools/s3client
+  sudo chmod -R 755 /shared/c2g2/galaxy-dist/tools/s3client
 
-echo "Move the out/deploy folder to tools/s3client in Galaxy and restart galaxy to deploy."
+  echo "If a change was made to the XML files, you must restart Galaxy."
+  echo "Changes to the JAR only do not require a restart."
+  echo -n "Restart galaxy using /home/fluetteka/bin/restart-galaxy.sh? (y/n)"
+  read cont
+
+  if [[ "$cont" -eq "y" ]]; then
+    echo "Restarting galaxy ..."
+    /home/fluetteka/bin/restart-galaxy.sh
+  else
+    echo "Not restarting galaxy. You must do so manually."
+  fi
+
+  echo "Cleaning up deployment folder ..."
+  rm -rf out/deploy
+
+  echo -n "Remove artifacts? (y/n) "
+  read remove_artifacts
+  if [[ "$remove_artifts" -eq "y" ]]; then
+    echo "Removing artifacts ..."
+    rm -rf out/artifacts
+  else
+    echo "Leaving artifacts intact at out/artifacts."
+  fi
+else
+  echo "This script is not running on freyja. You must manually deploy the new build."
+  echo "Copy the contents of out/deploy to the tools/s3client folder in galaxy-dist, then restart galaxy if any changes were made to the XML."
+fi
 
