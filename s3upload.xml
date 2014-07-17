@@ -1,6 +1,6 @@
 <tool id="S3UploadClient" name="Amazon S3 Upload">
 	<description>Upload files from Galaxy to Amazon S3</description>
-        <command interpreter="bash">/usr/local/bin/java -jar galaxy-s3client.jar u "$bucket" "$remotefile" "$localfile" "$accesskey" "$secretkey"</command>
+        <command>java -jar galaxy-s3client.jar u "$bucket" "$remotefile" "$localfile" "$accesskey" "$secretkey"</command>
         <inputs>
 		<param name="accesskey" type="text" size="30" label="Amazon AWS Access Key"/>
 		<param name="secretkey" type="text" size="50" label="Amazon AWS Secret Access Key"/>
