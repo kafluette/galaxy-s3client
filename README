@@ -1,0 +1,4 @@
+Make sure that you have the most up to date local source (via git pull).
+Run ./deploy.sh to create the deployment folder.
+Copy the contents of out/deploy to /shared/c2g2/galaxy-dist/tools/s3Client.
+Restart galaxy if any changes were made to the XML.
