@@ -1,18 +1,18 @@
 <tool id="S3UploadClient" name="Amazon S3 Upload">
 	<description>Upload files from Galaxy to Amazon S3</description>
-        <command>java -jar galaxy-s3client.jar u "$bucket" "$remotefile" "$localfile" "$accesskey" "$secretkey"</command>
+        <command interpreter="bash">run-s3client.sh u "$bucket" "$remotefile" "$localfile" "$accesskey" "$secretkey"</command>
         <inputs>
 		<param name="accesskey" type="text" size="30" label="Amazon AWS Access Key"/>
-		<param name="secretkey" type="text" size="50" label="Amazon AWS Secret Access Key"/>
-		<param name="bucket" type="text" size="40" label="Bucket to be worked with"/>
-		<param name="remotefile" type="text" size="50" label="File name on S3"/>
-		<param name="localfile" type="text" size="50" label="File name on Galaxy"/>
+		<param name="secretkey" type="text" size="60" label="Amazon AWS Secret Access Key"/>
+		<param name="bucket" type="text" size="30" label="Bucket to be worked with"/>
+		<param name="remotefile" type="text" size="60" label="File name on S3"/>
+		<param name="localfile" type="text" size="60" label="File name on Galaxy"/>
 	</inputs>
 	<outputs>
 		<data format="text" name="s3client_status" label="Amazon S3 Upload" />
 	</outputs>
 	<help>
-		This tool uploads files to Amazon S3 from Galaxy.
+		This tool uploads files from Galaxy to Amazon S3.
 	</help>
  </tool>
 
