@@ -8,10 +8,6 @@ else
   echo "Found JDK with javac at $(which javac)"
 fi
 
-echo "Cleaning up from previous deploy ..."
-rm -rf out/deploy >/dev/null 2>&1
-mkdir -p out/deploy
-
 echo "Assuring libraries are present ..."
 
 pushd . >/dev/null 2>&1
@@ -37,48 +33,54 @@ fi
 
 popd >/dev/null 2>&1
 
-echo "Building JAR ..."
+echo "Building JAR ... "
 ant
 if [[ $? -ne 0 ]]; then
   echo "Build failed."
   exit 11
+else
+    echo "New JAR built, located at out/artifacts/galaxy_s3client_jar/galaxy-s3client.jar"
 fi
 
-echo "Copying over required files ..."
-cp s3upload.xml s3download.xml out/deploy
-cp out/artifacts/galaxy_s3client_jar/galaxy-s3client.jar out/deploy
+echo "If a change was made to the XML files, you must restart Galaxy."
+echo "Changes to the JAR (or bash script) do not require a restart."
 
 if [[ "$(hostname)" -eq "freyja" ]]; then
-  echo "This script is running on freyja, attempting deploy ..."
-  sudo cp out/deploy/* /shared/c2g2/galaxy-dist/tools/s3client/
-  sudo chown -R galaxy:galaxy /shared/c2g2/galaxy-dist/tools/s3client
-  sudo chmod -R 755 /shared/c2g2/galaxy-dist/tools/s3client
-
-  echo "If a change was made to the XML files, you must restart Galaxy."
-  echo "Changes to the JAR only do not require a restart."
-  echo -n "Restart galaxy using /home/fluetteka/bin/restart-galaxy.sh? (y/n)"
-  read cont
-
-  if [[ "$cont" -eq "y" ]]; then
-    echo "Restarting galaxy ..."
-    /home/fluetteka/bin/restart-galaxy.sh
-  else
-    echo "Not restarting galaxy. You must do so manually."
-  fi
-
-  echo "Cleaning up deployment folder ..."
-  rm -rf out/deploy
-
-  echo -n "Remove artifacts? (y/n) "
-  read remove_artifacts
-  if [[ "$remove_artifts" -eq "y" ]]; then
-    echo "Removing artifacts ..."
-    rm -rf out/artifacts
-  else
-    echo "Leaving artifacts intact at out/artifacts."
-  fi
+    echo -n "This script is running on freyja. Do you want to copy over the jar? (y/n)  "
+    read -n should_copy
+    if [[ "$should_copy" -eq "y" ]]; then
+        echo -n "Copying JAR and fixing permissions ... "
+        sudo cp out/artifacts/galaxy_s3client_jar/galaxy-s3client.jar /shared/c2g2/galaxy-dist/tools/s3client/
+        sudo chown -R galaxy:galaxy /shared/c2g2/galaxy-dist/tools/s3client
+        sudo chmod -R 755 /shared/c2g2/galaxy-dist/tools/s3client
+        echo "Done."
+    else
+        echo "Not attempting deployment. To deploy the new JAR, copy it into the galaxy folder and assure good permissions."
+    fi
 else
-  echo "This script is not running on freyja. You must manually deploy the new build."
-  echo "Copy the contents of out/deploy to the tools/s3client folder in galaxy-dist, then restart galaxy if any changes were made to the XML."
+    echo -n "This script is not running on freyja. Attempt to deploy the JAR? "
+    read -n should_deploy
+    if [[ "$should_deploy" -eq "y" ]]; then
+        echo "Attempting naive remote deployment ... "
+        scp out/artifacts/galaxy_s3client_jar/galaxy-s3client.jar freyja:
+        ssh -t freyja 'sudo mv galaxy-s3client.jar /shared/c2g2/galaxy-dist/tools/s3client/'
+        ssh -t freyja 'sudo chown -R galaxy:galaxy /shared/c2g2/galaxy-dist/tools/s3client'
+        ssh -t freyja 'sudo chmod -R 755 /shared/c2g2/galaxy-dist/tools/s3client'
+        echo "Deployed new JAR and fixed permissions."
+    else
+        echo "Not attempting deployment. Manually deploy the JAR file if needed."
+    fi
 fi
+
+echo -n "Remove artifacts? (y/n) "
+read remove_artifacts
+if [[ "$remove_artifts" -eq "y" ]]; then
+    echo -n "Removing artifacts ... "
+    rm -rf out/artifacts
+    echo "Done."
+else
+    echo "Leaving artifacts intact at out/artifacts."
+fi
+
+echo "Note: this script only handled the JAR file. Any handling of XML files or the bash script must be done manually."
 
