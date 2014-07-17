@@ -3,3 +3,4 @@
 *.class
 out/
 src/META-INF/
+build.properties
